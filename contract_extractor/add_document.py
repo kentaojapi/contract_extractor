@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import Pinecone
+from langchain_core.documents.base import Document
 from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
@@ -22,30 +23,39 @@ def initialize_vectorstore():
     return Pinecone.from_existing_index(index_name, embeddings)
 
 
-def load_from_pdf(file_path: str) -> list:
-    loader = PyPDFLoader(file_path)
-    raw_docs = loader.load()
-    logger.info("Loaded %d documents", len(raw_docs))
-    print(raw_docs)
+class PDFLoader:
+    def __init__(self, file_path: str) -> None:
+        self.file_path = file_path
 
-    def clean_text(text):
-        return text.replace(' ', '').replace('\n', '').replace('\u3000', '')
+    @staticmethod
+    def _clean_text(text: str) -> str:
+        return text.replace(' ', '') \
+            .replace('\n', '') \
+            .replace('\u3000', '') \
+            .replace('\u2003', '')
 
-    cleaned_documents = []
-    for doc in raw_docs:
-        cleaned_text = clean_text(doc.page_content)
+    def _clean_and_update_doc(self, doc: Document) -> Document:
+        cleaned_text = self._clean_text(doc.page_content)
         doc.page_content = cleaned_text
-        cleaned_documents.append(doc)
-    print(cleaned_documents)
+        return doc
 
-    text_splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=30)
-    docs = text_splitter.split_documents(raw_docs)
-    logger.info("Split %d documents", len(docs))
-    return docs
+    def run(self) -> list[Document]:
+        loader = PyPDFLoader(self.file_path)
+        raw_docs = loader.load()
+        logger.info("Loaded %d documents", len(raw_docs))
+        print(raw_docs)
+
+        cleaned_documents = list(map(self._clean_and_update_doc, raw_docs))
+        print(cleaned_documents)
+
+        text_splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=30)
+        docs = text_splitter.split_documents(raw_docs)
+        logger.info("Split %d documents", len(docs))
+        return docs
 
 
 if __name__ == "__main__":
     file_path = sys.argv[1]
     vectorstore = initialize_vectorstore()
-    docs = load_from_pdf(file_path)
+    docs = PDFLoader(file_path).run()
     vectorstore.add_documents(docs)
