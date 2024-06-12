@@ -1,3 +1,5 @@
+import sys
+
 import langchain
 from dotenv import load_dotenv
 from langchain_core.output_parsers import JsonOutputParser
@@ -47,9 +49,16 @@ class Template:
             return file.read()
 
 
-def main() -> None:
+def main(file_name: str) -> None:
     prompt = Template().get()
-    retriever = initialize_vectorstore().as_retriever()
+    retriever = initialize_vectorstore().as_retriever(
+        search_kwargs={
+            "k": 4,
+            "filter": {
+                "source": file_name
+            }
+        }
+    )
 
     model = ChatModel().get()
     chain = (  # noqa: F841
@@ -64,4 +73,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    file_name = sys.argv[1]
+    main(file_name)
