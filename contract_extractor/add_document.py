@@ -1,3 +1,4 @@
+from functools import lru_cache
 import logging
 import os
 import sys
@@ -17,6 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+@lru_cache
 def initialize_vectorstore():
     index_name = os.environ["PINECONE_INDEX"]
     embeddings = OpenAIEmbeddings()
