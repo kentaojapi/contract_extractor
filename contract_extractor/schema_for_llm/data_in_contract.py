@@ -1,6 +1,6 @@
 from typing import Literal
 
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 
 class Address(BaseModel):
@@ -15,18 +15,21 @@ class Company(BaseModel):
     role: Literal["customer", "provider"] = Field(
         description="Role of the company. customer or provider."
     )
-    address: Address = Field(
-        description="Address of the company.")
+    address: Address = Field(description="Address of the company.")
+
 
 class ContractTerm(BaseModel):
     start_date: str = Field(
-        description="Start date of the contract period. The format is YYYY-MM-DD")
+        description="Start date of the contract period. The format is YYYY-MM-DD"
+    )
     end_date: str = Field(
-        description="End date of the contract period. The format is YYYY-MM-DD")
+        description="End date of the contract period. The format is YYYY-MM-DD"
+    )
 
 
 class DataInContract(BaseModel):
     document_title: str = Field(description="Title of the contract.")
     companies: list[Company] = Field(
-        description="Companies mentioned within the contract")
+        description="Companies mentioned within the contract"
+    )
     contract_term: ContractTerm = Field(description="Term of Contract.")

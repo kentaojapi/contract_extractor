@@ -1,13 +1,8 @@
-import langchain
-from add_document import initialize_vectorstore
-from dotenv import load_dotenv
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-from structure.data_in_contract import DataInContract
-
-load_dotenv()
-langchain.debug = True
+from schema_for_llm.data_in_contract import DataInContract
+from vectorstore.vectorstore import initialize_vectorstore
 
 
 class ChatModel:
@@ -42,7 +37,7 @@ class Template:
             return file.read()
 
 
-def get_details(file_name: str) -> dict:
+def extract_contract_details(file_name: str) -> DataInContract:
     prompt = Template().get()
     retriever = initialize_vectorstore().as_retriever(
         search_kwargs={"k": 4, "filter": {"source": file_name}}
@@ -53,7 +48,7 @@ def get_details(file_name: str) -> dict:
         {"context": retriever}
         | prompt
         | model
-        | JsonOutputParser(pydantic_object=DataInContract)
+        | PydanticOutputParser(pydantic_object=DataInContract)
     )
 
     return chain.invoke("")

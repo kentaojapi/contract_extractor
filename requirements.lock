@@ -120,7 +120,8 @@ pinecone-client==4.1.1
     # via contractextractor
 pinecone-plugin-interface==0.0.7
     # via pinecone-client
-pydantic==2.7.3
+pydantic==2.7.4
+    # via contractextractor
     # via fastapi
     # via langchain
     # via langchain-core
