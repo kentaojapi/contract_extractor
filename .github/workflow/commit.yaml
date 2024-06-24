@@ -1,0 +1,17 @@
+name: Hello World on Push
+
+on:
+  push:
+    branches:
+      - '**'  # すべてのブランチを対象に
+
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Say Hello
+      run: echo "Hello, World!"
