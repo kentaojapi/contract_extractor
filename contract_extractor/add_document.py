@@ -1,7 +1,7 @@
-from functools import lru_cache
 import logging
 import os
 import sys
+from functools import lru_cache
 
 from dotenv import load_dotenv
 from langchain.text_splitter import CharacterTextSplitter
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @lru_cache
-def initialize_vectorstore():
+def initialize_vectorstore() -> Pinecone:
     index_name = os.environ["PINECONE_INDEX"]
     embeddings = OpenAIEmbeddings()
     return Pinecone.from_existing_index(index_name, embeddings)
@@ -31,10 +31,12 @@ class PDFLoader:
 
     @staticmethod
     def _clean_text(text: str) -> str:
-        return text.replace(' ', '') \
-            .replace('\n', '') \
-            .replace('\u3000', '') \
-            .replace('\u2003', '')
+        return (
+            text.replace(" ", "")
+            .replace("\n", "")
+            .replace("\u3000", "")
+            .replace("\u2003", "")
+        )
 
     def _clean_and_update_doc(self, doc: Document) -> Document:
         cleaned_text = self._clean_text(doc.page_content)
